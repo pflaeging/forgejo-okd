@@ -6,6 +6,7 @@ Install:
 
 1. pull forgejo helm: `helm pull oci://code.forgejo.org/forgejo-helm/forgejo --untar --untardir charts/`
 1. edit [./values.yaml](./values.yaml)
+1. change the password in [./gitea-admin-secret.yaml](./gitea-admin-secret.yaml)
 1. apply it to your cluster: `oc kustomize --enable-helm | oc apply -f -`
 
 ## disconnected use
@@ -29,8 +30,15 @@ If your cluster is disconnected, you have to mirror the correct images in your l
       ```
 
 1. edit [./values.yaml](./values.yaml)
+1. change the password in [./gitea-admin-secret.yaml](./gitea-admin-secret.yaml)
 1. add the contents of `imagemirror.add.yaml` to the end of the [./kustomization.yaml](./kustomization.yaml)
 1. apply it to your cluster: `oc kustomize --enable-helm | oc apply -f -`
+
+## Addendum
+
+- The master admin is `forgejoadmin` like defined (password down there) in the secret  
+  You can change the password in the secret on the cluster and then restart the pods to make it happen
+- if you want to have a HA setup you have to customize the settings in values.yaml
 
 ---
 Peter Pfläging <<peter@pflaeging.net>>
