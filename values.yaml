@@ -1,0 +1,76 @@
+global:
+  compatibility:
+    openshift:
+      adaptSecurityContext: force
+
+route:
+  enabled: true
+  host: dev-forgejo.apps.mirkwood.pfpk.pro
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 250m
+    memory: 128Mi
+
+initContainers:
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+
+redis-cluster:
+  enabled: false
+
+redis:
+  enabled: true
+  storageClass: rook-ceph-block
+  resources:
+    limits:
+      cpu: 300m
+      memory: 128Mi
+    requests:
+      cpu: 150m
+      memory: 64Mi
+
+postgresql:
+  enabled: true
+  persistence:
+    enabled: true
+    storageClass: rook-ceph-block
+  resources:
+    limits:
+      cpu: 300m
+      memory: 250Mi
+    requests:
+      cpu: 150m
+      memory: 125Mi
+
+postgresql-ha:
+  enabled: false
+
+persistence:
+  enabled: true
+  storageClass: rook-cephfs
+
+gitea:
+  admin:
+    existingSecret: gitea-admin-secret
+  config:
+    server:
+      ROOT_URL: https://dev-forgejo.apps.mirkwood.pfpk.pro
+    service:
+      DISABLE_REGISTRATION: true
+    database:
+      DB_TYPE: postgres
+    indexer:
+      ISSUE_INDEXER_TYPE: bleve
+      REPO_INDEXER_ENABLED: true
+
+test:
+  enabled: false
