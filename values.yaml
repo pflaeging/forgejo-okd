@@ -63,7 +63,18 @@ gitea:
     existingSecret: gitea-admin-secret
   config:
     server:
+      # Your domain name
+      DOMAIN: dev-forgejo.apps.mirkwood.pfpk.pro
+      # must be http (we're behind a proxy / ingress)
+      PROTOCOL: http
+      # The path from outside!
       ROOT_URL: https://dev-forgejo.apps.mirkwood.pfpk.pro
+      # internal git user
+      BUILTIN_SSH_SERVER_USER: gituser
+      # external ssh port if you expose it via NodePort service
+      SSH_PORT: 32222
+      ## you can disable ssh server if you don't want to use this protocol
+      # DISABLE_SSH: true
     service:
       DISABLE_REGISTRATION: true
     database:
@@ -71,6 +82,13 @@ gitea:
     indexer:
       ISSUE_INDEXER_TYPE: bleve
       REPO_INDEXER_ENABLED: true
+
+## Optional: listen ssh on NodePort (maybe you have to enable this by your k8s team)
+service:
+  ssh:
+    type: NodePort
+    port: 22
+    nodePort: 32222
 
 test:
   enabled: false

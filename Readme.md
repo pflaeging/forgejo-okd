@@ -17,7 +17,24 @@ If your cluster is disconnected, you have to mirror the correct images in your l
 
 1. On an Internet connected host:
 
-    - pull forgejo helm: `helm pull oci://code.forgejo.org/forgejo-helm/forgejo --untar --untardir charts/`
+    - get the helm chart:
+
+      - Method 1: push the oci helm in your local registry:
+
+          ```shell
+          # login to your registry
+          helm registry login registry.local.lan --insecure
+          # pull the gzipped tar from original
+          helm pull oci://code.forgejo.org/forgejo-helm/forgejo --version=10.1.2
+          # push the helm repo to your registry (org=myorg)
+          helm push forgejo-10.1.2.tgz oci://registry.local.lan/myorg/forgejo-helm --insecure-skip-tls-verify
+          ```
+
+      - Method 2: get the helm chart local and use it from repo
+
+        - pull forgejo helm: `helm pull oci://code.forgejo.org/forgejo-helm/forgejo --untar --untardir charts/`
+        - modify the `kustomization.yaml` so that you get the chart from this directory
+
     - get the images and push them in your local registry:
 
       ```shell
