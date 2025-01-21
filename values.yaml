@@ -57,6 +57,8 @@ postgresql-ha:
 persistence:
   enabled: true
   storageClass: rook-cephfs
+  accessModes: 
+  - ReadWriteMany
 
 gitea:
   admin:

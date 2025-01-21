@@ -11,7 +11,7 @@ resources:
 helmCharts:
 - name: forgejo
   # in the disconnected use case overwrite this URL with your helm repo container
-  repo: oci://code.forgejo.org/forgejo-helm/forgejo
+  repo: oci://code.forgejo.org/forgejo-helm/
   version: 10.1.2
   releaseName: test-forgejo
   valuesFile: values.yaml
