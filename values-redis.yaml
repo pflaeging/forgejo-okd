@@ -1,0 +1,15 @@
+redis-cluster:
+  enabled: false
+
+redis:
+  enabled: true
+  image:
+    tag: 7.4.2-debian-12-r0
+  storageClass: rook-ceph-block
+  resources:
+    limits:
+      cpu: 300m
+      memory: 128Mi
+    requests:
+      cpu: 150m
+      memory: 64Mi

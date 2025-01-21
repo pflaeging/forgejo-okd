@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- gitea-admin-secret.yaml
+- forgejo-admin-secret.yaml
 
 ## If you have no registry for helm charts use the second method defined in the Readme and this definition:
 # helmGlobals:
@@ -12,12 +12,15 @@ helmCharts:
 - name: forgejo
   # in the disconnected use case overwrite this URL with your helm repo container
   repo: oci://code.forgejo.org/forgejo-helm/
-  version: 10.1.2
+  version: 11.0.1
   releaseName: test-forgejo
   valuesFile: values.yaml
+  additionalValuesFiles:
+  - values-postgresql.yaml
+  - values-redis.yaml
 
 
 generatorOptions:
   disableNameSuffixHash: true
-
+#
 

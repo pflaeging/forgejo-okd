@@ -57,5 +57,47 @@ If your cluster is disconnected, you have to mirror the correct images in your l
   You can change the password in the secret on the cluster and then restart the pods to make it happen
 - if you want to have a HA setup you have to customize the settings in values.yaml
 
+
+## Upgrading
+
+Postgresql 16 to 17 is a bit of pain! The easiest way in this scenario:
+
+- upgrade forgejo, leaving the postgresql pods on version 16
+- scale down the forgejo deployment
+- enter the postgresql pod and generate a DB dump:
+
+    ```shell
+    # at first look, what names your pod has. My names are starting with test-
+    oc exec -ti pod/test-forgejo-postgresql-0 -- bash
+    # now inside the pod
+    cd /bitnami/postgresql/data/
+    # password is in secret/test-forgejo-postgresql in the field password
+    pg_dump -U gitea > gitea16.dump
+    ```
+
+- leave the container and get the dump to your local machine with:  
+    `oc cp test-forgejo-postgresql-0:/bitnami/postgresql/data/gitea.dump gitea.dump`
+- stop the statefulset with:  
+    `oc scale statefulset/test-forgejo-postgresql --replicas=0`
+- drop the PVC data-test-forgejo-postgresql-0
+- now make an upgrade to postgresql (editing the correct values file and exchange the tag or in kustomization.yaml)  
+    The new PVC is created and you start with an empty database!
+- import the dump to your container:  
+    `oc cp gitea.dump test-forgejo-postgresql-0:/bitnami/postgresql/data/gitea.dump`
+- enter the postgresql pod and import the database:
+
+    ```shell
+    # login to psql (password same like above)
+    psql -U gitea gitea
+    \c gitea
+    drop schema public;
+    create schema public;
+    \c gitea
+    \ir /bitnami/postgresql/data/gitea.dump
+    \q
+    ```
+
+- now you've updated our DB and it's time to start the forgejo deployments!
+
 ---
 Peter Pfläging <<peter@pflaeging.net>>
