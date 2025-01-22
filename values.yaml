@@ -2,13 +2,16 @@ global:
   compatibility:
     openshift:
       adaptSecurityContext: force
+  defaultStorageClass: rook-ceph-block
+
+replicaCount: 2
 
 route:
   enabled: true
   annotations:
     cert-manager.io/issuer-kind: ClusterIssuer
     cert-manager.io/issuer-name: letsencrypt-prod
-  host: dev-forgejo.apps.mirkwood.pfpk.pro
+  host: forgejo.develop.pflaeging.net
 
 resources:
   limits:
@@ -42,11 +45,11 @@ gitea:
   config:
     server:
       # Your domain name
-      DOMAIN: dev-forgejo.apps.mirkwood.pfpk.pro
+      DOMAIN: forgejo.develop.pflaeging.net
       # must be http (we're behind a proxy / ingress)
       PROTOCOL: http
       # The path from outside!
-      ROOT_URL: https://dev-forgejo.apps.mirkwood.pfpk.pro
+      ROOT_URL: https://forgejo.develop.pflaeging.net
       # internal git user
       BUILTIN_SSH_SERVER_USER: gituser
       # external ssh port if you expose it via NodePort service
@@ -58,8 +61,10 @@ gitea:
     database:
       DB_TYPE: postgres
     indexer:
-      ISSUE_INDEXER_TYPE: bleve
-      REPO_INDEXER_ENABLED: true
+      ISSUE_INDEXER_ENABLED: false
+      # ISSUE_INDEXER_TYPE: db
+      REPO_INDEXER_ENABLED: false
+      # REPO_INDEXER:TYPE: db
 
 ## Optional: listen ssh on NodePort (maybe you have to enable this by your k8s team)
 service:

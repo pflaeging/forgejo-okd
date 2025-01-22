@@ -16,9 +16,12 @@ helmCharts:
   releaseName: test-forgejo
   valuesFile: values.yaml
   additionalValuesFiles:
-  - values-postgresql.yaml
-  - values-redis.yaml
-
+  # use this for single instances
+  # - values-postgresql.yaml
+  # - values-redis.yaml
+  # use this for a redundant installation (production)
+  - values-postgresql-ha.yaml
+  - values-redis-ha.yaml
 
 generatorOptions:
   disableNameSuffixHash: true

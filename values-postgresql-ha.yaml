@@ -1,14 +1,14 @@
-redis-cluster:
+postgresql:
   enabled: false
 
-redis:
+postgresql-ha:
   enabled: true
   image:
-    tag: 7.4.2-debian-12-r0
+    tag: 17.2.0-debian-12-r7
   resources:
     limits:
       cpu: 300m
-      memory: 128Mi
+      memory: 250Mi
     requests:
       cpu: 150m
-      memory: 64Mi
+      memory: 125Mi
