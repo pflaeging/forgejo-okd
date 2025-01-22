@@ -72,7 +72,7 @@ Postgresql 16 to 17 is a bit of pain! The easiest way in this scenario:
     # now inside the pod
     cd /bitnami/postgresql/data/
     # password is in secret/test-forgejo-postgresql in the field password
-    pg_dump -U gitea > gitea16.dump
+    pg_dump -U gitea > gitea.dump
     ```
 
 - leave the container and get the dump to your local machine with:  
