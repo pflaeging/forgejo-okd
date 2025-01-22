@@ -13,7 +13,7 @@ helmCharts:
   # in the disconnected use case overwrite this URL with your helm repo container
   repo: oci://code.forgejo.org/forgejo-helm/
   version: 11.0.1
-  releaseName: test-forgejo
+  releaseName: pp-forgejo-test
   valuesFile: values.yaml
   additionalValuesFiles:
   # use this for single instances

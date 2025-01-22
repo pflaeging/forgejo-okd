@@ -1,7 +1,8 @@
 postgresql:
   enabled: true
-  image:
-    tag: 17.2.0-debian-12-r6
+  # if you want another version of postgres
+  # image:
+  #   tag: 17.2.0-debian-12-r6
   resources:
     limits:
       cpu: 300m

@@ -3,8 +3,9 @@ postgresql:
 
 postgresql-ha:
   enabled: true
-  image:
-    tag: 17.2.0-debian-12-r7
+  # if you want another version of postgres
+  # image:
+  #   tag: 17.2.0-debian-12-r7
   resources:
     limits:
       cpu: 300m

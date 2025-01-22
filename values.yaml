@@ -38,26 +38,38 @@ persistence:
   - ReadWriteMany
 
 gitea:
-  image:
-    tag: 10.0.0
+  # if you want another version of forgejo
+  # image:
+  #   tag: 10.0.0
   admin:
     existingSecret: forgejo-admin-secret
   config:
     server:
+##########
+## Customize part begins here
       # Your domain name
       DOMAIN: forgejo.develop.pflaeging.net
       # must be http (we're behind a proxy / ingress)
       PROTOCOL: http
       # The path from outside!
       ROOT_URL: https://forgejo.develop.pflaeging.net
+      ## you can disable ssh server if you don't want to use this protocol
+      # DISABLE_SSH: true
+      # we use http as protocol, because we're behind an ingress (TLS termination on ingress)
+      PROTOCOL: http
       # internal git user
       BUILTIN_SSH_SERVER_USER: gituser
       # external ssh port if you expose it via NodePort service
       SSH_PORT: 32222
-      ## you can disable ssh server if you don't want to use this protocol
-      # DISABLE_SSH: true
+    actions:
+      # actions are disabled (no runner in kubernetes for the moment)
+      ENABLED: false
+    APP_NAME: 'pflaeging.net git Repository'
     service:
+      # decide if you want self registration
       DISABLE_REGISTRATION: true
+##########
+## End customize part
     database:
       DB_TYPE: postgres
     indexer:

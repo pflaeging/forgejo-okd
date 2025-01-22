@@ -3,8 +3,9 @@ redis-cluster:
 
 redis:
   enabled: true
-  image:
-    tag: 7.4.2-debian-12-r0
+  # if you want another version of redis
+  # image:
+  #   tag: 7.4.2-debian-12-r0
   resources:
     limits:
       cpu: 300m
