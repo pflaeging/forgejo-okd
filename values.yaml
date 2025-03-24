@@ -42,7 +42,7 @@ gitea:
   # image:
   #   tag: 10.0.0
   admin:
-    existingSecret: forgejo-admin-secret
+    existingSecret: pp-forgejo-test-admin-secret
   config:
     server:
 ##########

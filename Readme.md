@@ -5,9 +5,9 @@ Special config for forgejo running in an OKD / OpenShift cluster with *Route* el
 Install:
 
 1. pull forgejo helm: `helm pull oci://code.forgejo.org/forgejo-helm/forgejo --untar --untardir charts/`
-1. edit [./values.yaml](./values.yaml)
-1. change the password in [./gitea-admin-secret.yaml](./gitea-admin-secret.yaml)
-1. apply it to your cluster: `kustomize build . --enable-helm | oc apply -f -`
+1. change the password in [./admin-secret.env](./admin-secret.env)
+1. check the kustomization.yaml file
+1. apply it to your cluster: `oc kustomize . --enable-helm | oc apply -f -`
 
 (at the moment the built in kusomtize of oc is not working. It's working with the builtin kustomize of kubectl v1.32 and with kustomize v5.5. Maybe the builtin kustomize version of oc is to old)
 

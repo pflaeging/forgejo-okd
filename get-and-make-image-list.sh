@@ -1,6 +1,14 @@
 #! /bin/sh
-# Script helper for 
-
+# Script helper for generating image mirroring configuration files.
+#
+# Description:
+# This script generates two files based on the provided registry path:
+#   - imagelist.csv: A comma-separated list of Docker images with their respective mirrored versions in the new registry.
+#   - imagemirror.add.yaml: YAML additions to append to your kustomization.yaml file for mirroring images from the original registry to the specified new registry.
+#
+# Usage:
+#   Usage: $0 new-registry-path (like myregistry.pflaeging.net/myproject)
+#
 if [ $# -ne 1 ]; then
   echo "Usage: $0 new-registry-path"
   echo "     (like myregistry.pflaeging.net/myproject)"

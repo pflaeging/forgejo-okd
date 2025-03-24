@@ -1,9 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-resources:
-- forgejo-admin-secret.yaml
-
 ## If you have no registry for helm charts use the second method defined in the Readme and this definition:
 # helmGlobals:
 #   chartHome: ./charts
@@ -22,6 +19,12 @@ helmCharts:
   # use this for a redundant installation (production)
   - values-postgresql-ha.yaml
   - values-redis-ha.yaml
+
+secretGenerator:
+  # bring the name of the secret in sync with the specified name in values.yaml
+  - name: pp-forgejo-test-admin-secret
+    envs:
+    - admin-secret.env
 
 generatorOptions:
   disableNameSuffixHash: true
