@@ -31,4 +31,4 @@ metadata:
 data:
   ca-bundle.crt: |-
    
-``` 
+```
