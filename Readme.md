@@ -2,22 +2,25 @@
 
 Special config for forgejo running in an OKD / OpenShift cluster with *Route* elements and Namespace Resourcequotas.
 
-Install:
+The method is complete GitOps based:
 
-1. pull forgejo helm: `helm pull oci://code.forgejo.org/forgejo-helm/forgejo --untar --untardir charts/`
-1. change the password in [./admin-secret.env](./admin-secret.env)
-1. check the kustomization.yaml file
-1. apply it to your cluster: `oc kustomize . --enable-helm | oc apply -f -`
+1. create an instance repo (look at the instancetemplate directory)
+1. use this repo as submodule of the instance repo
+1. make your customizings
+1. if your in a disconnected scenario mirror the helm chart and the used images (use case: **disconnected installation**)
 
-(at the moment the built in kusomtize of oc is not working. It's working with the builtin kustomize of kubectl v1.32 and with kustomize v5.5. Maybe the builtin kustomize version of oc is to old)
+## internet connected installation
 
-## disconnected use
+1. make an instance repo for your installation based on the description in [./instancetemplate/Readme.md](./instancetemplate/Readme.md)
+
+## disconnected installation
 
 If your cluster is disconnected, you have to mirror the correct images in your local registry.
 
 (Skopeo has to be installed)
 
-1. On an Internet connected host:
+1. make an instance repo for your installation based on the description in [./instancetemplate/Readme.md](./instancetemplate/Readme.md) without the last step (dpeloyment in your cluster)
+1. on an Internet connected host:
 
     - get the helm chart:
 
@@ -27,30 +30,30 @@ If your cluster is disconnected, you have to mirror the correct images in your l
           # login to your registry
           helm registry login registry.local.lan --insecure
           # pull the gzipped tar from original
-          helm pull oci://code.forgejo.org/forgejo-helm/forgejo --version=10.1.2
+          helm pull oci://code.forgejo.org/forgejo-helm/forgejo --version=11.0.5
           # push the helm repo to your registry (org=myorg)
-          helm push forgejo-10.1.2.tgz oci://registry.local.lan/myorg/forgejo-helm --insecure-skip-tls-verify
+          helm push forgejo-11.0.5.tgz oci://registry.local.lan/myorg/forgejo-helm --insecure-skip-tls-verify
           ```
 
       - Method 2: get the helm chart local and use it from repo
 
         - pull forgejo helm: `helm pull oci://code.forgejo.org/forgejo-helm/forgejo --untar --untardir charts/`
-        - modify the `kustomization.yaml` so that you get the chart from this directory
+        - modify the upper level `kustomization.yaml` so that you get the chart from this directory
 
     - get the images and push them in your local registry:
 
       ```shell
+      # go to instance directory
+      cd forgejo-instance-directory
       # get the image list and generate imagelist.csv and imagemirror.add.yaml
-      ./get-and-make-image-list.sh mylocalregistry.mynetwork.lan/mymirrorproject
+      ./forgejo-okd/get-and-make-image-list.sh mylocalregistry.mynetwork.lan/mymirrorproject
       # login to your local registry
       skopeo login mylocalregistry.mynetwork.lan --tls-verify=false 
       # get and push images
-      ./image-mirror.py -v imagelist.csv
+      ./forgejo-okd/image-mirror.py -v imagelist.csv
       ```
 
-1. edit [./values.yaml](./values.yaml)
-1. change the password in [./gitea-admin-secret.yaml](./gitea-admin-secret.yaml)
-1. add the contents of `imagemirror.add.yaml` to the end of the [./kustomization.yaml](./kustomization.yaml)
+1. add the contents of `imagemirror.add.yaml` to the end of the `kustomization.yaml`
 1. apply it to your cluster: `oc kustomize --enable-helm | oc apply -f -`
 
 ## Addendum
@@ -58,7 +61,6 @@ If your cluster is disconnected, you have to mirror the correct images in your l
 - The master admin is `forgejoadmin` like defined (password down there) in the secret  
   You can change the password in the secret on the cluster and then restart the pods to make it happen
 - if you want to have a HA setup you have to customize the settings in values.yaml
-
 
 ## Upgrading
 
