@@ -1,0 +1,96 @@
+global:
+  compatibility:
+    openshift:
+      adaptSecurityContext: force
+  # define your block storage class    
+  defaultStorageClass: rook-ceph-block
+
+replicaCount: 2
+
+route:
+  enabled: true
+  # enable cert-manager controlled tls
+  annotations:
+    cert-manager.io/issuer-kind: ClusterIssuer
+    cert-manager.io/issuer-name: letsencrypt-prod
+  host: forgejo.develop.pflaeging.net
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 250m
+    memory: 128Mi
+
+initContainers:
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+
+persistence:
+  enabled: true
+  # use shared storage for your repos
+  storageClass: rook-cephfs
+  # define the size of your storage
+  size: 10Gi
+  claimName: forgejo-shared-storage
+  accessModes: 
+  - ReadWriteMany
+
+gitea:
+  # if you want another version of forgejo
+  # image:
+  #   tag: 10.0.0
+  admin:
+    # this secret must have the same name as the one in your kustomization.yaml
+    existingSecret: pp-forgejo-test-admin-secret
+  config:
+    server:
+##########
+## Customize part begins here
+      # Your domain name
+      DOMAIN: forgejo.develop.pflaeging.net
+      # must be http (we're behind a proxy / ingress)
+      PROTOCOL: http
+      # The path from outside!
+      ROOT_URL: https://forgejo.develop.pflaeging.net
+      ## you can disable ssh server if you don't want to use this protocol
+      # DISABLE_SSH: true
+      # we use http as protocol, because we're behind an ingress (TLS termination on ingress)
+      PROTOCOL: http
+      # internal git user
+      BUILTIN_SSH_SERVER_USER: gituser
+      # external ssh port if you expose it via NodePort service
+      SSH_PORT: 32222
+    actions:
+      # actions are disabled (no runner in kubernetes for the moment)
+      ENABLED: false
+    APP_NAME: 'pflaeging.net git Repository'
+    service:
+      # decide if you want self registration
+      DISABLE_REGISTRATION: true
+##########
+## End customize part
+    database:
+      DB_TYPE: postgres
+    indexer:
+      ISSUE_INDEXER_ENABLED: false
+      # ISSUE_INDEXER_TYPE: db
+      REPO_INDEXER_ENABLED: false
+      # REPO_INDEXER:TYPE: db
+
+## Optional: listen ssh on NodePort (maybe you have to enable this by your k8s team)
+service:
+  ssh:
+    type: NodePort
+    port: 22
+    nodePort: 32222
+
+test:
+  enabled: false
+#

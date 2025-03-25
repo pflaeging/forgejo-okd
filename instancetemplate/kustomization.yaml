@@ -1,0 +1,39 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# define your namespace
+namespace: forgejo
+
+## If you have no registry for helm charts use the second method defined in the Readme and this definition:
+# helmGlobals:
+#   chartHome: ./charts
+
+helmCharts:
+- name: forgejo
+  # in the disconnected use case overwrite this URL with your helm repo container
+  repo: oci://code.forgejo.org/forgejo-helm/
+  # find the actual release in https://code.forgejo.org/forgejo-helm/-/packages/container/forgejo/versions
+  version: 11.0.1
+  # define the release name
+  releaseName: pp-forgejo-test
+  # give helm also your namespace (same value as above)
+  namespace: forgejo
+  valuesFile: values.yaml
+  additionalValuesFiles:
+  # use this for single instances
+  # - values-postgresql.yaml
+  # - values-redis.yaml
+  # use this for a redundant installation (production)
+  - forgejo-okd/values-postgresql-ha.yaml
+  - forgejo-okd/values-redis-ha.yaml
+
+secretGenerator:
+  # bring the name of the secret in sync with the specified name in values.yaml
+  - name: pp-forgejo-test-admin-secret
+    envs:
+    - admin-secret.env
+
+generatorOptions:
+  disableNameSuffixHash: true
+#
+
