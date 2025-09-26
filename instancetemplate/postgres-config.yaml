@@ -1,0 +1,13 @@
+- op: replace
+  path: /spec/instances
+  # Increase replicas in production environment
+  value: 3
+
+- op: add
+  path: /spec/storage
+  value:
+     # Gubernat storage class
+    # storageClass: local-path
+    # Openshift storage class
+    storageClass: rook-cephfs
+    size: 1Gi

@@ -2,18 +2,16 @@ global:
   compatibility:
     openshift:
       adaptSecurityContext: force
-  # define your block storage class    
-  defaultStorageClass: rook-ceph-block
+  # Storage settings will be overridden by environment-specific patches
+  defaultStorageClass: local-path
 
-replicaCount: 2
+replicaCount: 1
+
+ingress:
+  enabled: false  # Will be enabled by kubernetes platform overlay
 
 route:
-  enabled: true
-  # enable cert-manager controlled tls
-  annotations:
-    cert-manager.io/issuer-kind: ClusterIssuer
-    cert-manager.io/issuer-name: letsencrypt-prod
-  host: forgejo.develop.pflaeging.net
+  enabled: false  # Will be enabled by openshift platform overlay
 
 resources:
   limits:
@@ -34,13 +32,12 @@ initContainers:
 
 persistence:
   enabled: true
-  # use shared storage for your repos
-  storageClass: rook-cephfs
-  # define the size of your storage
-  size: 10Gi
+  # Storage settings will be overridden by environment-specific patches
+  storageClass: local-path
+  size: 2Gi
   claimName: forgejo-shared-storage
   accessModes: 
-  - ReadWriteMany
+  - ReadWriteOnce
 
 gitea:
   # if you want another version of forgejo
@@ -48,17 +45,36 @@ gitea:
   #   tag: 10.0.0
   admin:
     # this secret must have the same name as the one in your kustomization.yaml
-    existingSecret: pp-forgejo-test-admin-secret
+    existingSecret: forgejo-admin-secret
+  additionalConfigFromEnvs:
+    - name: FORGEJO__DATABASE__PASSWD
+      valueFrom:
+        secretKeyRef:
+          name: forgejo-postgres-app
+          key: password
+
+  queue:
+    TYPE: redis
+    CONN_STR: redis+cluster://valkey:6379/0
+
+  cache:
+    ADAPTER: redis
+    HOST: redis+cluster://valkey:6379/0
+
+  session:
+    PROVIDER: redis
+    PROVIDER_CONFIG: redis+cluster://valkey:6379/0
+
   config:
     server:
 ##########
 ## Customize part begins here
       # Your domain name
-      DOMAIN: forgejo.develop.pflaeging.net
+      DOMAIN: forgejo.example.com
       # must be http (we're behind a proxy / ingress)
       PROTOCOL: http
       # The path from outside!
-      ROOT_URL: https://forgejo.develop.pflaeging.net
+      ROOT_URL: https://forgejo.example.com
       ## you can disable ssh server if you don't want to use this protocol
       # DISABLE_SSH: true
       # we use http as protocol, because we're behind an ingress (TLS termination on ingress)
@@ -78,6 +94,11 @@ gitea:
 ## End customize part
     database:
       DB_TYPE: postgres
+      HOST: forgejo-postgres-rw:5432
+      NAME: forgejo
+      USER: forgejo
+      # Password will be set via environment variable instead
+      # PASSWD: 
     indexer:
       ISSUE_INDEXER_ENABLED: false
       # ISSUE_INDEXER_TYPE: db

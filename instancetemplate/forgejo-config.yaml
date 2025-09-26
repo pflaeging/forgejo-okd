@@ -1,0 +1,66 @@
+_domain: &domain forgejo.cluster.net
+_rootUrl: &rootUrl https://forgejo.cluster.net/
+
+global:
+  # Gubernat storage class
+  # defaultStorageClass: local-path
+  # Openshift storage class
+  defaultStorageClass: rook-ceph-block
+
+# Increase replicas in production environment
+replicaCount: 2
+
+# Gubernat Ingress
+# ingress:
+#   enabled: true
+#   annotations:
+#     # Annotations for production certs
+#     cert-manager.io/issuer-kind: ClusterIssuer
+#     cert-manager.io/issuer-name: letsencrypt-prod
+#     # Annotations for self-signed certs
+#     # cert-manager.io/cluster-issuer: gubernat-issuer
+#   hosts: 
+#     - host: *domain
+#       paths:
+#         - path: /
+#           pathType: Prefix
+#   tls:
+#     - hosts:
+#         - *domain
+#       secretName: forgejo-tls-cert
+
+
+# OpenShift Route
+route:
+  enabled: true
+  annotations:
+    cert-manager.io/issuer-kind: ClusterIssuer
+    cert-manager.io/issuer-name: letsencrypt-prod
+  host: *domain
+
+
+gitea:
+  config:
+    server:
+      DOMAIN: *domain
+      ROOT_URL: *rootUrl
+
+persistence:
+  # Gubernat storage class
+  # storageClass: local-path
+  # Openshift storage class
+  storageClass: rook-cephfs
+  size: 20Gi
+  accessModes: 
+  # When using local-path
+  # - ReadWriteOnce
+  # When using rook-cephfs or local-path-shared
+  - ReadWriteMany
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 500m
+    memory: 256Mi

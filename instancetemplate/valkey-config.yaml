@@ -1,0 +1,14 @@
+- op: replace
+  path: /spec/volumeClaimTemplates
+  value:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        # For Openshift
+        storageClassName: rook-cephfs
+        # For Gubernates with local-path provisioner
+        # storageClassName: local-path
+        resources:
+          requests:
+            storage: 1Gi
