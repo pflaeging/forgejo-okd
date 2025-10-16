@@ -1,27 +1,40 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# define your namespace
 namespace: forgejo
 
+# use prefix for name and suffix for stage
+namePrefix: pp-
+nameSuffix: -test
+
 resources:
-- ../templates/forgejo-okd/base
+- ./forgejo-okd/base
+
+## If you have no registry for helm charts use the second method defined in the Readme and this definition:
+# helmGlobals:
+#   chartHome: ./charts
+helmCharts:
+- name: forgejo
+  # in the disconnected use case overwrite this URL with your helm repo container
+  repo: oci://code.forgejo.org/forgejo-helm/
+  # find the actual release in https://code.forgejo.org/forgejo-helm/-/packages/container/forgejo/versions
+  version: 14.0.4
+  releaseName: forgejo
+  valuesFile: ./forgejo-okd/base/forgejo/values.yaml
+  additionalValuesFiles:
+  # here are your customized forgejo values
+  - forgejo-config.yaml
 
 secretGenerator:
+  # bring the name of the secret in sync with the specified name in values.yaml
   - name: forgejo-admin-secret
     envs:
     - forgejo-admin-secret.env
 
 generatorOptions:
   disableNameSuffixHash: true
-
-helmCharts:
-- name: forgejo
-  repo: oci://code.forgejo.org/forgejo-helm/
-  version: 14.0.3
-  releaseName: forgejo
-  valuesFile: ../templates/forgejo-okd/base/forgejo/values.yaml
-  additionalValuesFiles:
-  - forgejo-config.yaml
+#
 
 patches:
 - target:
@@ -32,3 +45,4 @@ patches:
     kind: StatefulSet
     name: valkey
   path: valkey-config.yaml
+#

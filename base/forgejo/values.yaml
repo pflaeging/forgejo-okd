@@ -40,77 +40,28 @@ persistence:
   - ReadWriteOnce
 
 gitea:
-  # if you want another version of forgejo
-  # image:
-  #   tag: 10.0.0
-  admin:
-    # this secret must have the same name as the one in your kustomization.yaml
-    existingSecret: forgejo-admin-secret
-  additionalConfigFromEnvs:
-    - name: FORGEJO__DATABASE__PASSWD
-      valueFrom:
-        secretKeyRef:
-          name: forgejo-postgres-app
-          key: password
 
   queue:
     TYPE: redis
-    CONN_STR: redis+cluster://valkey:6379/0
+    CONN_STR: redis+cluster://forgejo-valkey:6379/0
 
   cache:
     ADAPTER: redis
-    HOST: redis+cluster://valkey:6379/0
+    HOST: redis+cluster://forgejo-valkey:6379/0
 
   session:
     PROVIDER: redis
-    PROVIDER_CONFIG: redis+cluster://valkey:6379/0
+    PROVIDER_CONFIG: redis+cluster://forgejo-valkey:6379/0
 
   config:
-    server:
-##########
-## Customize part begins here
-      # Your domain name
-      DOMAIN: forgejo.example.com
-      # must be http (we're behind a proxy / ingress)
-      PROTOCOL: http
-      # The path from outside!
-      ROOT_URL: https://forgejo.example.com
-      ## you can disable ssh server if you don't want to use this protocol
-      # DISABLE_SSH: true
-      # we use http as protocol, because we're behind an ingress (TLS termination on ingress)
-      PROTOCOL: http
-      # internal git user
-      BUILTIN_SSH_SERVER_USER: gituser
-      # external ssh port if you expose it via NodePort service
-      SSH_PORT: 32222
-    actions:
-      # actions are disabled (no runner in kubernetes for the moment)
-      ENABLED: false
-    APP_NAME: 'pflaeging.net git Repository'
-    service:
-      # decide if you want self registration
-      DISABLE_REGISTRATION: true
-##########
-## End customize part
     database:
       DB_TYPE: postgres
-      HOST: forgejo-postgres-rw:5432
-      NAME: forgejo
-      USER: forgejo
-      # Password will be set via environment variable instead
-      # PASSWD: 
+      # paramters are set via env
     indexer:
       ISSUE_INDEXER_ENABLED: false
       # ISSUE_INDEXER_TYPE: db
       REPO_INDEXER_ENABLED: false
       # REPO_INDEXER:TYPE: db
-
-## Optional: listen ssh on NodePort (maybe you have to enable this by your k8s team)
-service:
-  ssh:
-    type: NodePort
-    port: 22
-    nodePort: 32222
 
 test:
   enabled: false

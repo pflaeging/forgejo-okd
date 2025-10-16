@@ -1,66 +1,110 @@
-_domain: &domain forgejo.cluster.net
-_rootUrl: &rootUrl https://forgejo.cluster.net/
+# here comes your forgejo instance domain name
+_domain: &domain pp-forgejo-test.develop.pflaeging.net
+# the complete URL for your instance
+_rootUrl: &rootUrl https://pp-forgejo-test.develop.pflaeging.net/
+# the name of the forgejo-admin-secret: This is typically
+#   PREFIX-forgejo-admin-secret-SUFFIX
+_adminSecretName: &adminSecretName pp-forgejo-admin-secret-test
+# the name of the postgres-app-secret: This is typically
+#   PREFIX-forgejo-postgres-SUFFIX-app
+_postgresSecretName: &postgresSecretName pp-forgejo-postgres-test-app
 
 global:
-  # Gubernat storage class
-  # defaultStorageClass: local-path
-  # Openshift storage class
-  defaultStorageClass: rook-ceph-block
+  compatibility:
+    openshift:
+      adaptSecurityContext: force
+  # define your block storage class    
+  defaultStorageClass: rook-cephfs
 
-# Increase replicas in production environment
-replicaCount: 2
+replicaCount: 1
 
-# Gubernat Ingress
-# ingress:
-#   enabled: true
-#   annotations:
-#     # Annotations for production certs
-#     cert-manager.io/issuer-kind: ClusterIssuer
-#     cert-manager.io/issuer-name: letsencrypt-prod
-#     # Annotations for self-signed certs
-#     # cert-manager.io/cluster-issuer: gubernat-issuer
-#   hosts: 
-#     - host: *domain
-#       paths:
-#         - path: /
-#           pathType: Prefix
-#   tls:
-#     - hosts:
-#         - *domain
-#       secretName: forgejo-tls-cert
-
-
-# OpenShift Route
 route:
   enabled: true
+  # enable cert-manager controlled tls
   annotations:
     cert-manager.io/issuer-kind: ClusterIssuer
     cert-manager.io/issuer-name: letsencrypt-prod
   host: *domain
 
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 250m
+    memory: 128Mi
+
+initContainers:
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+
+persistence:
+  enabled: true
+  # use shared storage for your repos
+  storageClass: rook-cephfs
+  # define the size of your storage
+  size: 10Gi
+  claimName: forgejo-shared-storage
+  accessModes: 
+  - ReadWriteMany
 
 gitea:
+  APP_NAME: 'pflaeging.net git Repository'
+  admin:
+    # this secret must have the same name as the one in your kustomization.yaml
+    existingSecret: *adminSecretName
   config:
     server:
       DOMAIN: *domain
       ROOT_URL: *rootUrl
+##########
+## Customize part begins here
+      ## you can disable ssh server if you don't want to use this protocol
+      # DISABLE_SSH: true
+      # we use http as protocol, because we're behind an ingress (TLS termination on ingress)
+      PROTOCOL: http
+      # internal git user
+      BUILTIN_SSH_SERVER_USER: gituser
+      # external ssh port if you expose it via NodePort service
+      SSH_PORT: 32225
+    actions:
+      # actions are disabled (no runner in kubernetes for the moment)
+      ENABLED: false
+    service:
+      # decide if you want self registration
+      DISABLE_REGISTRATION: true
+##########
+## End customize part
+  additionalConfigFromEnvs:
+    - name: FORGEJO__DATABASE__PASSWD
+      valueFrom:
+        secretKeyRef:
+          name: *postgresSecretName
+          key: password
+    - name: FORGEJO__DATABASE__HOST
+      valueFrom:
+        secretKeyRef:
+          name: *postgresSecretName
+          key: host
+    - name: FORGEJO__DATABASE__NAME
+      valueFrom:
+        secretKeyRef:
+          name: *postgresSecretName
+          key: dbname
+    - name: FORGEJO__DATABASE__USER
+      valueFrom:
+        secretKeyRef:
+          name: *postgresSecretName
+          key: user
 
-persistence:
-  # Gubernat storage class
-  # storageClass: local-path
-  # Openshift storage class
-  storageClass: rook-cephfs
-  size: 20Gi
-  accessModes: 
-  # When using local-path
-  # - ReadWriteOnce
-  # When using rook-cephfs or local-path-shared
-  - ReadWriteMany
-
-resources:
-  limits:
-    cpu: 1000m
-    memory: 512Mi
-  requests:
-    cpu: 500m
-    memory: 256Mi
+## Optional: listen ssh on NodePort (maybe you have to enable this by your k8s team)
+service:
+  ssh:
+    type: NodePort
+    port: 22
+    nodePort: 32225

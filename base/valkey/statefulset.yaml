@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: valkey
+  name: forgejo-valkey
 spec:
   # Using Parallel pod management policy for several key reasons:
   # 1. Enables simultaneous pod creation/termination instead of sequential
@@ -14,11 +14,11 @@ spec:
   replicas: 3
   selector:
     matchLabels:
-      app: valkey
+      app: forgejo-valkey
   template:
     metadata:
       labels:
-        app: valkey
+        app: forgejo-valkey
     spec:
       # setup configuration, directories and ensure correct permissions
       initContainers:
@@ -123,10 +123,10 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: valkey
+            name: forgejo-valkey
         - name: scripts
           configMap:
-            name: valkey
+            name: forgejo-valkey
             items:
               - key: init-cluster.sh
                 path: init-cluster.sh

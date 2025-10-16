@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: valkey
+  name: forgejo-valkey
 data:
   valkey.conf: |
     protected-mode no

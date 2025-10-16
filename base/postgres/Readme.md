@@ -13,3 +13,9 @@ helm upgrade --install cnpg \
 Operator runs in namespace: `cnpg-system`.
 
 PostgreSQL clusters are rolled out with CRD's: `clusters.postgresql.cnpg.io`
+
+### Operator on OpenShift / OKD
+
+As cluster admin: `oc apply -f subscription.yaml` .
+
+This installs the operator via OLM in OpenShift / OKD
