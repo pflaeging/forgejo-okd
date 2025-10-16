@@ -45,4 +45,8 @@ patches:
     kind: StatefulSet
     name: valkey
   path: valkey-config.yaml
+
+
+configurations:
+  - kustomizeconfig.yaml
 #
