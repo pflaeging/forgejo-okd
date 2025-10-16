@@ -23,7 +23,7 @@ spec:
       # setup configuration, directories and ensure correct permissions
       initContainers:
         - name: init-config
-          image: busybox
+          image: docker.io/library/busybox:1.37
           command: ["sh", "/scripts/init-config.sh"]
           volumeMounts:
             - name: config
